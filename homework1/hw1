@@ -1,0 +1,8 @@
+function set_under_diagonal(A,value)
+    dim=size(A)
+    m=min(dim[1],dim[2])
+    for i = 2:m
+        A[i+1,i]=value
+    end
+    return A
+end
