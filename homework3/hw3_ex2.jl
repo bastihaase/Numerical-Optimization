@@ -1,0 +1,144 @@
+using KrylovMethods
+using OptimTools
+using PyPlot
+include("approxHessian.jl")
+include("armijo.jl")
+
+#for plots
+
+font1 = ["family"=>"serif",
+    "color"=>"black",
+    "weight"=>"normal",
+    "size"=>20]
+
+#Rosenbrock functions and first two derivatives
+
+
+f(x)=(1-x[1])^2+100*(x[2]-x[1]^2)^2
+grad(x)=[-2*(1-x[1])-400*(x[1]*x[2]-x[1]^3),200*(x[2]-x[1]^2)]
+hess(x)=[+2-400*x[2]+1200*x[1]^2 -400*x[1] ; -400*x[1] 200]
+
+#Test Approx Hessian Method in approxHessian.jl
+
+x=[0,0]
+dir=randn(6,2)
+res=zeros(14,6)
+exact=hess(x)
+for j=1:6
+	p=vec(dir[j,:])
+	p/=norm(p)
+	for i= 1:14
+	  	res[i,j]=norm(exact*p-approx_action_of_hessian(grad,x,p,10.0^(-14+i)))
+	end
+end
+subplot(121)
+loglog(map(i->10.0^(-14+i),[1:14]),res,marker="o")
+title("Error of Approx. Action of Hessian at (0,0)",fontdict=font1)
+xlabel("Parameter eps",fontdict=font1)
+ylabel("Error",fontdict=font1)
+
+
+x=[-1.2,2.5]
+dir=randn(6,2)
+res=zeros(14,6)
+exact=hess(x)
+for j=1:6
+	p=vec(dir[j,:])
+	p/=norm(p)
+	for i= 1:14
+	  	res[i,j]=norm(exact*p-approx_action_of_hessian(grad,x,p,10.0^(-14+i)))
+	end
+end
+subplot(122)
+loglog(map(i->10.0^(-14+i),[1:14]),res,marker="o")
+title("Error of Approx. Action of Hessian at (-1.2,2.5)",fontdict=font1)
+xlabel("Parameter eps",fontdict=font1)
+ylabel("Error",fontdict=font1)
+
+
+
+
+
+# Minimizing Rosenbrock with BFGS and Newton CG with hessian and approximated hessian
+x_0=[-1.2,2.5]
+
+# Use BFGS
+@time res=bfgs(f,grad,x_0,maxIter=100,lineSearch=my_armijo)
+his=res[3]
+iterations=size(his)[1]
+fnc_eval=sum(his[:,3])+iterations
+grad_eval=iterations+1
+hess_eval=0
+mat_vec_prod=iterations
+mat_mat_prod=2*iterations
+@printf "\n\nBFGS \n"
+@printf "iter=%4d\t|f|=%1.2e\t|df|=%1.2e\n" iterations his[iterations,1] his[iterations,2] 
+@printf "fnc_eval=%d\ngrad_eval=%d\nhess_eval=%d\n" fnc_eval grad_eval hess_eval
+@printf "mat_vec_prod=%d\nmat_mat_prod=%d\n" mat_vec_prod mat_mat_prod
+@printf "The maximum number of line searches was %d\n\n" maximum(his[:,3])
+
+#Use MewtonCG with Hessian
+@time res=newtoncg(f,grad,hess,x_0,maxIter=100,lineSearch=my_armijo)
+his=res[3]
+iterations=size(his)[1]
+fnc_eval=sum(his[:,3])+iterations
+grad_eval=iterations
+hess_eval=iterations
+mat_vec_prod=sum(his[:,4])
+mat_mat_prod=0
+@printf "\n\nNewtonCG with Hessian \n"
+@printf "iter=%4d\t|f|=%1.2e\t|df|=%1.2e\n" iterations his[iterations,1] his[iterations,2] 
+@printf "fnc_eval=%d\ngrad_eval=%d\nhess_eval=%d\n" fnc_eval grad_eval hess_eval
+@printf "mat_vec_prod=%d\nmat_mat_prod=%d\n" mat_vec_prod mat_mat_prod
+@printf "The maximum number of line searches was %d\n\n" maximum(his[:,3])
+@printf "The maximum number of cg steps was %d\n\n" maximum(his[:,4])
+
+#Use NewtonCG with Approximated Hessian
+@time res=newtoncg(f,grad,z->approx_hessian(grad,z),x_0,maxIter=100,lineSearch=my_armijo)
+his=res[3]
+iterations=size(his)[1]
+fnc_eval=sum(his[:,3])+iterations
+grad_eval=iterations+iterations*2*2  #second summand: approximate hessian: each iteration approximate hessian for two vectors (1,0) and (0,1). Each iterations requires two function evaluations
+hess_eval=0
+mat_vec_prod=sum(his[:,4])
+mat_mat_prod=0
+@printf "\n\nNewtonCG with approximated Hessian\n"
+@printf "iter=%4d\t|f|=%1.2e\t|df|=%1.2e\n" iterations his[iterations,1] his[iterations,2]
+@printf "fnc_eval=%d\ngrad_eval=%d\nhess_eval=%d\n" fnc_eval grad_eval hess_eval
+@printf "mat_vec_prod=%d\nmat_mat_prod=%d\n" mat_vec_prod mat_mat_prod
+@printf "The maximum number of line searches was %d\n\n" maximum(his[:,3])
+@printf "The maximum number of cg steps was %d\n\n" maximum(his[:,4])
+
+#Use NewtonCG with Approximated Hessian, different implementation
+@time res=newtoncg(f,grad,z->[(grad(z+10.0^(-6)*[1,0])-grad(z))/10.0^(-6)  (grad(z+10.0^(-6)*[0,1])-grad(z))/10.0^(-6)]',x_0,maxIter=100,lineSearch=my_armijo)
+his=res[3]
+iterations=size(his)[1]
+fnc_eval=sum(his[:,3])+iterations
+grad_eval=iterations+iterations*2*2  #second summand: approximate hessian: each iteration approximate hessian for two vectors (1,0) and (0,1). Each iterations requires two function evaluations
+hess_eval=0
+mat_vec_prod=sum(his[:,4])
+mat_mat_prod=0
+@printf "\n\nNewtonCG with approximated Hessian but different implementation\n"
+@printf "iter=%4d\t|f|=%1.2e\t|df|=%1.2e\n" iterations his[iterations,1] his[iterations,2]
+@printf "fnc_eval=%d\ngrad_eval=%d\nhess_eval=%d\n" fnc_eval grad_eval hess_eval
+@printf "mat_vec_prod=%d\nmat_mat_prod=%d\n" mat_vec_prod mat_mat_prod
+@printf "The maximum number of line searches was %d\n\n" maximum(his[:,3])
+@printf "The maximum number of cg steps was %d\n\n" maximum(his[:,4])
+
+
+#Use NewtonCG with Approximated Action of Hessian
+@time res=newtoncg(f,grad,z->(p->(grad(z+10.0^(-6)*p)-grad(z))/10.0^(-6)),x_0,maxIter=100,lineSearch=my_armijo)
+his=res[3]
+iterations=size(his)[1]
+fnc_eval=sum(his[:,3])+iterations
+grad_eval=iterations+sum(his[:,4])*2  #second summand: approximate action hessian: 2 evaluations per cg step
+hess_eval=0
+mat_vec_prod=0
+mat_mat_prod=0
+@printf "\n\nNewtonCG with aproximated Action of Hessian\n"
+@printf "iter=%4d\t|f|=%1.2e\t|df|=%1.2e\n" iterations his[iterations,1] his[iterations,2]
+@printf "fnc_eval=%d\ngrad_eval=%d\nhess_eval=%d\n" fnc_eval grad_eval hess_eval
+@printf "mat_vec_prod=%d\nmat_mat_prod=%d\n" mat_vec_prod mat_mat_prod
+@printf "The maximum number of line searches was %d\n\n" maximum(his[:,3])
+@printf "The maximum number of cg steps was %d\n\n" maximum(his[:,4])
+

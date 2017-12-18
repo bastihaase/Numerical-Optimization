@@ -1,0 +1,8 @@
+\contentsline {section}{\numberline {1}Exercise 1}{2}
+\contentsline {subsection}{\numberline {1.1}Introduction}{2}
+\contentsline {subsection}{\numberline {1.2}The Objective Function and its Gradient}{2}
+\contentsline {subsection}{\numberline {1.3}Convergence on $[0.1,5]^2$}{4}
+\contentsline {subsubsection}{\numberline {1.3.1}The Setup}{4}
+\contentsline {subsubsection}{\numberline {1.3.2}Interpretation}{5}
+\contentsline {subsection}{\numberline {1.4}Gauss-Newton vs BFGS}{5}
+\contentsline {subsection}{\numberline {1.5}Noise}{8}

@@ -1,0 +1,7 @@
+\contentsline {section}{\numberline {1}Exercise 1}{2}
+\contentsline {section}{\numberline {2}Exercise 2}{2}
+\contentsline {subsection}{\numberline {2.1}Approximating the Action of the Hessian}{2}
+\contentsline {subsection}{\numberline {2.2}Minimizing the Rosenbrock Function}{4}
+\contentsline {section}{\numberline {3}Exercise 3}{6}
+\contentsline {subsection}{\numberline {3.1}Numerical Stability}{7}
+\contentsline {subsection}{\numberline {3.2}Performance of BFGS and Newton}{8}
