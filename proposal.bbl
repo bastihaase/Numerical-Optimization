@@ -1,0 +1,19 @@
+\begin{thebibliography}{DGW81}
+
+\bibitem[BD71]{Brown1971}
+Kenneth~M. Brown and John~E. Dennis.
+\newblock {New Computational Algorithms For Minimizing A Sum Of Squares Of
+  Nonlinear Functions}.
+\newblock {\em Research Report Number 71 - 6, Yale University}, 1971.
+
+\bibitem[DGW81]{Dennis1981}
+John~E. Dennis, David~M. Gay, and Roy~E. Welsh.
+\newblock {An Adaptive Nonlinear Least-Squares Algorithm}.
+\newblock {\em ACM Transactions on Mathematical Software}, 7(3):348--368, 1981.
+
+\bibitem[Fle86]{Fletcher1986}
+R~Fletcher.
+\newblock {\em {Practical methods of optimization}}.
+\newblock Wiley, 1986.
+
+\end{thebibliography}
